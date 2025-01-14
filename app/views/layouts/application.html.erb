@@ -24,6 +24,7 @@
   </head>
 
   <body class="bg-zinc-50 dark:bg-gray-600">
+  <%= render partial: "shared/flash", locals: { notice: flash[:notice], alert: flash[:alert] } %>
   <header>
     <nav class="bg-white text-gray-800 dark:text-white dark:bg-gray-800 w-full z-20 top-0 start-0 shadow fixed">
       <div class="max-w-5xl flex flex-wrap items-center justify-between mx-auto p-4">

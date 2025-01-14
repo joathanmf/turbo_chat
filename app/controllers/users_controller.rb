@@ -10,7 +10,7 @@ class UsersController < ApplicationController
       session[:user_id] = @user.id
       redirect_to chat_show_path(params[:room_name])
     else
-      flash.now[:alert] = "Erro ao criar o usuário."
+      flash[:alert] = "Erro ao criar o usuário"
       render :new, status: :unprocessable_entity
     end
   end
