@@ -1,0 +1,42 @@
+<div class="flex items-center justify-center min-h-screen">
+  <div class="w-full max-w-md bg-white rounded-xl shadow p-6 mx-2 dark:bg-gray-800">
+    <h5 class="text-2xl font-medium text-gray-900 dark:text-white mb-4 text-center">
+      Bem-vindo ao Shat
+    </h5>
+
+    <%= form_with url: chat_path, method: :post, class: "my-10" do |f| %>
+      <button
+        type="submit"
+        class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none
+        focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600
+        dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+      >
+        Criar novo chat
+      </button>
+    <% end %>
+
+    <%= form_with url: chat_path, method: :get, class: "space-y-6" do |f| %>
+      <div>
+        <label
+          for="room_name_enter"
+          class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+        >
+          Código do Chat
+        </label>
+        <div class="flex items-center space-x-2 rtl:space-x-reverse">
+          <%= f.text_field :room_name, id: "room_name_enter",
+                           class: "flex-grow bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                   focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-600 dark:border-gray-500
+                   dark:placeholder-gray-400 dark:text-white",
+                           autocomplete: "off", placeholder: "Exemplo: d67add05", required: true %>
+          <button
+            type="submit"
+            class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+          >
+            Entrar
+          </button>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

@@ -1,0 +1,21 @@
+<div class="flex items-start mb-4" id="<%= dom_id(message) %>">
+  <div class="flex w-full justify-between">
+    <div class="flex flex-col gap-1 w-full">
+      <!-- Informações do Usuário -->
+      <div class="<%= from_stream ? 'flex items-center justify-start space-x-2' : 'flex items-center justify-end space-x-2 rtl:space-x-reverse' %>">
+        <span class="text-sm font-semibold text-gray-900 dark:text-white">
+          <%= message.user.name %>
+        </span>
+        <span class="text-sm font-normal text-gray-500 dark:text-gray-400">
+          <%= message.created_at.strftime('%H:%M') %>
+        </span>
+      </div>
+      <!-- Conteúdo da Mensagem -->
+      <div class="<%= from_stream ? 'leading-1.5 px-3 py-2 bg-gray-200 dark:bg-gray-600 text-gray-900 rounded-e-xl rounded-es-xl dark:bg-gray-700 dark:text-white max-w-[70%] w-fit' : 'leading-1.5 px-3 py-2 bg-blue-600 text-white rounded-l-xl rounded-tr-xl max-w-[70%] w-fit justify-center ml-auto' %>">
+        <p class="text-sm font-normal break-words">
+          <%= message.content %>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
