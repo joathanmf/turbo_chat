@@ -4,5 +4,14 @@
 
 import { application } from "./application"
 
+import ScrollController from "./scroll_controller"
+application.register("scroll", ScrollController)
+
+import ClearController from "./clear_controller"
+application.register("clear", ClearController)
+
+import CharacterCounter from "@stimulus-components/character-counter"
+application.register("character-counter", CharacterCounter)
+
 import Notification from "@stimulus-components/notification"
 application.register("notification", Notification)
