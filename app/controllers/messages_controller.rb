@@ -8,10 +8,25 @@ class MessagesController < ApplicationController
 
     if @message.save
       respond_to do |format|
-        format.turbo_stream { render turbo_stream: turbo_stream.append(
-          "messages", partial: "messages/message", locals: { message: @message, from_stream: false }
-        ) }
+        format.turbo_stream do
+          render turbo_stream: turbo_stream.append(
+            "messages", partial: "messages/message", locals: { message: @message, from_stream: false }
+          )
+        end
         format.html { redirect_to chat_show_path(params[:room_name]) }
+      end
+    else
+      respond_to do |format|
+        format.turbo_stream do
+          render turbo_stream: turbo_stream.update(
+            "form-errors",
+            partial: "shared/flash", locals: { alert: "Erro ao enviar mensagem" }
+          )
+        end
+        format.html do
+          flash[:alert] = "Erro ao enviar mensagem"
+          redirect_to chat_show_path(params[:room_name])
+        end
       end
     end
   end

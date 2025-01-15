@@ -14,6 +14,8 @@
       <% end %>
     </div>
   </div>
+  <div id="form-errors"></div>
+
   <!-- Formulário de Envio -->
   <div class="px-4 pt-4 pb-2 bg-gray-100 sm:rounded-b-lg dark:bg-gray-700" data-controller="character-counter" data-character-counter-countdown-value="true">
     <%= form_with url: chat_create_path, method: :post, id: "message-form", local: true, html: { class: 'flex items-center gap-4' }, data: { controller: "clear", action: "turbo:submit-end->clear#clearInput"  } do |form| %>
@@ -22,7 +24,7 @@
                           class: "flex-1 px-4 py-3 border border-gray-300 dark:border-none rounded-lg shadow-sm bg-white
                           text-black placeholder-gray-500 focus:outline-none focus:ring focus:border-blue-500 resize-none
                           dark:bg-gray-600 dark:text-white dark:placeholder-gray-400 w-full",
-                          data: { character_counter_target: "input" },  maxlength: "1024"
+                          data: { character_counter_target: "input", clear_target: "input" },  maxlength: "1024"
       %>
       <button
         type="submit"
@@ -37,7 +39,7 @@
     <% end %>
     <p class="text-sm text-gray-600 dark:text-gray-300 mt-2">
       Caracteres restantes:
-      <strong data-character-counter-target="counter"></strong>
+      <strong data-character-counter-target="counter" id="character-counter"></strong>
     </p>
   </div>
 </div>
