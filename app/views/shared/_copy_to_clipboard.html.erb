@@ -1,0 +1,20 @@
+<div data-controller="clipboard" data-clipboard-success-content-value="Copiado!">
+  <div class="mb-2 flex justify-between items-center">
+    <label for="room-name" class="text-sm font-semibold text-gray-900 dark:text-white"><%= label_text %>:</label>
+  </div>
+  <div class="flex">
+    <input
+      type="text"
+      value="<%= value %>"
+      data-clipboard-target="source"
+      class="text-sm bg-gray-50 border rounded-l-lg border-gray-300 text-gray-500 dark:text-gray-400 focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
+
+    <button
+      type="button"
+      data-action="clipboard#copy"
+      data-clipboard-target="button"
+      class="text-sm bg-blue-700 text-white px-4 py-2 rounded-r-lg hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-700">
+      Copiar
+    </button>
+  </div>
+</div>

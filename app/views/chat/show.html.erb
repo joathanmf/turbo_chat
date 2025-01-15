@@ -1,10 +1,26 @@
 <div class="flex flex-col h-[calc(100svh-4.5rem)] sm:h-[calc(100svh-5rem)] mt-[4.5rem] sm:rounded-lg bg-white dark:bg-gray-800 shadow" data-controller="scroll">
   <!-- Cabeçalho do Chat -->
-  <div class="text-center pt-4">
-    <h1 class="text-2xl text-gray-800 dark:text-white">
-      Código do chat: <%= @room.name %>
-    </h1>
+  <div class="flex items-center justify-between px-4 py-2">
+    <div class="flex items-center">
+      <!-- Botão de Voltar -->
+      <%= link_to root_path do %>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5 text-gray-700 dark:text-white">
+          <path fill-rule="evenodd" d="M7.793 2.232a.75.75 0 0 1-.025 1.06L3.622 7.25h10.003a5.375 5.375 0 0 1 0 10.75H10.75a.75.75 0 0 1 0-1.5h2.875a3.875 3.875 0 0 0 0-7.75H3.622l4.146 3.957a.75.75 0 0 1-1.036 1.085l-5.5-5.25a.75.75 0 0 1 0-1.085l5.5-5.25a.75.75 0 0 1 1.06.025Z" clip-rule="evenodd"/>
+        </svg>
+      <% end %>
+    </div>
+    <!-- Botão do Modal -->
+    <div class="flex items-center">
+      <button data-modal-target="info-modal" data-modal-toggle="info-modal"
+              class="flex items-center text-white text-lg text-center" type="button">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
+          <path fill-rule="evenodd" d="M7.84 1.804A1 1 0 0 1 8.82 1h2.36a1 1 0 0 1 .98.804l.331 1.652a6.993 6.993 0 0 1 1.929 1.115l1.598-.54a1 1 0 0 1 1.186.447l1.18 2.044a1 1 0 0 1-.205 1.251l-1.267 1.113a7.047 7.047 0 0 1 0 2.228l1.267 1.113a1 1 0 0 1 .206 1.25l-1.18 2.045a1 1 0 0 1-1.187.447l-1.598-.54a6.993 6.993 0 0 1-1.929 1.115l-.33 1.652a1 1 0 0 1-.98.804H8.82a1 1 0 0 1-.98-.804l-.331-1.652a6.993 6.993 0 0 1-1.929-1.115l-1.598.54a1 1 0 0 1-1.186-.447l-1.18-2.044a1 1 0 0 1 .205-1.251l1.267-1.114a7.05 7.05 0 0 1 0-2.227L1.821 7.773a1 1 0 0 1-.206-1.25l1.18-2.045a1 1 0 0 1 1.187-.447l1.598.54A6.992 6.992 0 0 1 7.51 3.456l.33-1.652ZM10 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" clip-rule="evenodd"/>
+        </svg>
+      </button>
+      <%= render partial: "shared/chat_modal" %>
+    </div>
   </div>
+
   <!-- Mensagens -->
   <div class="flex-1 overflow-y-auto p-4 space-y-4" data-scroll-target="messages">
     <%= turbo_stream_from @room %>
@@ -18,13 +34,13 @@
 
   <!-- Formulário de Envio -->
   <div class="px-4 pt-4 pb-2 bg-gray-100 sm:rounded-b-lg dark:bg-gray-700" data-controller="character-counter" data-character-counter-countdown-value="true">
-    <%= form_with url: chat_create_path, method: :post, id: "message-form", local: true, html: { class: 'flex items-center gap-4' }, data: { controller: "clear", action: "turbo:submit-end->clear#clearInput"  } do |form| %>
+    <%= form_with url: chat_create_path, method: :post, id: "message-form", local: true, html: { class: 'flex items-center gap-4' }, data: { controller: "clear", action: "turbo:submit-end->clear#clearInput" } do |form| %>
       <%= form.text_field :content, placeholder: "Digite sua mensagem...",
                           autocomplete: "off", id: "message-input",
                           class: "flex-1 px-4 py-3 border border-gray-300 dark:border-none rounded-lg shadow-sm bg-white
                           text-black placeholder-gray-500 focus:outline-none focus:ring focus:border-blue-500 resize-none
                           dark:bg-gray-600 dark:text-white dark:placeholder-gray-400 w-full",
-                          data: { character_counter_target: "input", clear_target: "input" },  maxlength: "1024"
+                          data: { character_counter_target: "input", clear_target: "input" }, maxlength: "1024"
       %>
       <button
         type="submit"

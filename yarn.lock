@@ -143,6 +143,11 @@
   resolved "https://registry.yarnpkg.com/@stimulus-components/character-counter/-/character-counter-5.0.0.tgz#9a1e9e88d2893212270bda7e254a5b80d0081b0f"
   integrity sha512-oMXJ6B6qtV6FRmLa6riMNn/7Nym1m0RxN9q4Vv3KrVOlfXBZlHxAwGpCfC4+sIEKwTl08bWj1iDry97kdzF9nA==
 
+"@stimulus-components/clipboard@^5.0.0":
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/@stimulus-components/clipboard/-/clipboard-5.0.0.tgz#1d119c4ba8827c6c11c2e1b9214d0de79bc0cc87"
+  integrity sha512-gbwU1sVBiKfMGGCt6oyXx9mGD+cEcHBSqaz//5UVepoQqzl2jYEUWQGFIO0f48LMOamEQwR1azQKfHq6llv6oA==
+
 "@stimulus-components/notification@^3.0.0":
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@stimulus-components/notification/-/notification-3.0.0.tgz#f67ec72bb0601ec33f597494def72e6ca93dd4a5"

@@ -3,6 +3,10 @@ class Room < ApplicationRecord
 
   before_create :set_name
 
+  def users
+    User.where(id: messages.pluck(:user_id))
+  end
+
   private
 
   def set_name
