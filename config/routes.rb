@@ -7,6 +7,7 @@ Rails.application.routes.draw do
 
     scope ":room_name" do
       get "/", to: "chat#show", as: :show
+
       get "users/new", to: "users#new", as: :users_new
       post "users/new", to: "users#create", as: :users_create
 

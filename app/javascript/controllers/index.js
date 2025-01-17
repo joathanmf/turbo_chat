@@ -2,20 +2,24 @@
 // Run that command whenever you add a new controller or create them with
 // ./bin/rails generate stimulus controllerName
 
-import { application } from "./application"
+import { application } from "./application";
 
-// IMPORT JAVASCRIPT CONTROLLERS
-import ScrollController from "./scroll_controller"
-import ClearController from "./clear_controller"
+// CONTROLLERS
+import ScrollController from "./scroll_controller";
+import ClearController from "./clear_controller";
+import ChatController from "./chat_controller";
 
-application.register("scroll", ScrollController)
-application.register("clear", ClearController)
+application.register("scroll", ScrollController);
+application.register("clear", ClearController);
+application.register("chat", ChatController);
 
 // STIMULUS COMPONENTS
-import CharacterCounter from "@stimulus-components/character-counter"
-import Notification from "@stimulus-components/notification"
-import Clipboard from '@stimulus-components/clipboard'
+import CharacterCounter from "@stimulus-components/character-counter";
+import Notification from "@stimulus-components/notification";
+import Clipboard from "@stimulus-components/clipboard";
+import Dialog from "@stimulus-components/dialog";
 
-application.register("character-counter", CharacterCounter)
-application.register("notification", Notification)
-application.register('clipboard', Clipboard)
+application.register("character-counter", CharacterCounter);
+application.register("notification", Notification);
+application.register("clipboard", Clipboard);
+application.register("dialog", Dialog);

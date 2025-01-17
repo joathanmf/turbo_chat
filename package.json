@@ -12,8 +12,10 @@
   "dependencies": {
     "@hotwired/stimulus": "^3.2.2",
     "@hotwired/turbo-rails": "^8.0.12",
+    "@rails/actioncable": "^8.0.100",
     "@stimulus-components/character-counter": "^5.0.0",
     "@stimulus-components/clipboard": "^5.0.0",
+    "@stimulus-components/dialog": "^1.0.1",
     "@stimulus-components/notification": "^3.0.0",
     "autoprefixer": "^10.4.20",
     "flowbite": "^2.5.2",

@@ -6,8 +6,9 @@ class ChatController < ApplicationController
 
   def show
     @room = Room.find_by!(name: params[:room_name])
-    @messages = @room.messages.includes(:user).order(:created_at)
-    @users = @room.users
+    @messages = @room.messages.order(:created_at)
+
+    RoomUser.find_or_create_by!(user: current_user, room: @room)
   end
 
   def create

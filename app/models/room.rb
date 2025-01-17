@@ -1,11 +1,10 @@
 class Room < ApplicationRecord
   has_many :messages, dependent: :destroy
 
-  before_create :set_name
+  has_many :room_users, dependent: :destroy
+  has_many :users, through: :room_users
 
-  def users
-    User.where(id: messages.pluck(:user_id))
-  end
+  before_create :set_name
 
   private
 
