@@ -483,6 +483,7 @@ input::placeholder { color: var(--muted); }
 }
 
 .link-row { display: flex; gap: 8px; margin-top: 18px; }
+.copy { min-width: 116px; } /* same width for "Copiar link" and "Copiado" */
 .link-row input { height: 40px; padding: 0 14px; border-radius: 12px; color: var(--muted); font-size: 14px; text-overflow: ellipsis; }
 
 .people { margin: 0; padding: 0; list-style: none; }

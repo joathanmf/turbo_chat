@@ -52,15 +52,18 @@ export default class extends Controller {
     this.infoTarget.showModal()
   }
 
-  async share(event) {
-    const url = this.linkTarget.value
-    if (navigator.share) {
-      try { await navigator.share({ title: "Turbo Chat", text: "Entra na minha sala:", url }) } catch {}
-      return
+  async copy({ currentTarget: button }) {
+    const link = this.linkTarget
+    try {
+      await navigator.clipboard.writeText(link.value)
+    } catch {
+      // navigator.clipboard only exists on https/localhost; plain http (e.g. phone on the LAN) falls back.
+      link.select()
+      document.execCommand("copy")
+      link.setSelectionRange(0, 0)
     }
-    await navigator.clipboard.writeText(url)
-    const button = event.currentTarget
-    button.textContent = "Link copiado"
-    setTimeout(() => (button.textContent = "Compartilhar"), 2000)
+    button.textContent = "Copiado"
+    clearTimeout(this.copyTimer)
+    this.copyTimer = setTimeout(() => (button.textContent = "Copiar link"), 3000)
   }
 }

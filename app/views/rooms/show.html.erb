@@ -48,15 +48,15 @@
     <p class="muted">Quem tiver o link entra. Ele é a única chave.</p>
     <div class="link-row">
       <input type="text" readonly value="<%= room_url(@token) %>" aria-label="Link da sala" data-room-target="link">
-      <button type="button" class="btn btn-dark btn-sm" data-action="room#share">Compartilhar</button>
+      <button type="button" class="btn btn-dark btn-sm copy" data-action="room#copy" aria-live="polite">Copiar link</button>
     </div>
+
+    <h3>Aparência</h3>
+    <%= render "layouts/theme_switch" %>
 
     <h3>Online agora</h3>
     <ul id="people" class="people">
       <%= render partial: "users/user", collection: Presence.users(@token), as: :user %>
     </ul>
-
-    <h3>Aparência</h3>
-    <%= render "layouts/theme_switch" %>
   </dialog>
 </div>
