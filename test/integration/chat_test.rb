@@ -65,6 +65,17 @@ class ChatTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "theme cookie is rendered on <html>, junk values fall back to system" do
+    cookies[:theme] = "dark"
+    get root_path
+    assert_select "html[data-theme=dark]"
+    assert_select "input[name=theme][value=dark][checked]"
+
+    cookies[:theme] = "<script>"
+    get root_path
+    assert_select "html[data-theme]", count: 0
+  end
+
   test "malformed room tokens do not route" do
     get "/r/short"
     assert_response :not_found

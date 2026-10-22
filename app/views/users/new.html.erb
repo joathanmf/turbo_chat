@@ -1,16 +1,20 @@
 <% content_for :title, "Entrar na sala · Turbo Chat" %>
-<%= render "layouts/nav" %>
 
-<main class="page">
-  <section class="card">
-    <h1>Como quer ser chamado?</h1>
-    <p class="muted">Só quem está na sala vai ver. Nada fica salvo.</p>
+<div class="screen">
+  <main class="hero">
+    <section class="card">
+      <%= render "layouts/logo" %>
+      <h1>Como quer ser chamado?</h1>
+      <p class="muted">Só quem está na sala vai ver.</p>
 
-    <%= form_with url: room_user_path(@token), class: "stack" do |f| %>
-      <label for="name" class="sr-only">Nome ou apelido</label>
-      <%= f.text_field :name, id: "name", value: current_user&.name, placeholder: "Nome ou apelido", required: true, autofocus: true,
-            minlength: User::NAME_LENGTH.min, maxlength: User::NAME_LENGTH.max, autocomplete: "nickname", class: "field" %>
-      <button class="btn btn-dark">Entrar na sala <span aria-hidden="true">→</span></button>
-    <% end %>
-  </section>
-</main>
+      <%= form_with url: room_user_path(@token), class: "stack" do |f| %>
+        <label for="name" class="sr-only">Nome ou apelido</label>
+        <%= f.text_field :name, id: "name", value: current_user&.name, placeholder: "Nome ou apelido", required: true, autofocus: true,
+              minlength: User::NAME_LENGTH.min, maxlength: User::NAME_LENGTH.max, autocomplete: "nickname", class: "field" %>
+        <button class="btn btn-dark">Entrar na sala <span aria-hidden="true">→</span></button>
+      <% end %>
+    </section>
+  </main>
+
+  <%= render "layouts/footer" %>
+</div>

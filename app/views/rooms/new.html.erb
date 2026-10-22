@@ -1,16 +1,13 @@
-<%= render "layouts/nav" %>
-
-<main class="page">
-  <section class="hero">
-    <p class="eyebrow">Sem cadastro · Sem histórico</p>
+<div class="screen">
+  <main class="hero">
+    <%= render "layouts/logo" %>
+    <p class="eyebrow">Turbo Chat</p>
     <h1>Converse.<br><span class="grad">Sem deixar rastros.</span></h1>
-    <p class="lead">Crie uma sala, mande o link e pronto. As mensagens só viajam entre quem está na sala. Ninguém, nem o servidor, guarda nada.</p>
+    <p class="lead">Crie uma sala, mande o link e pronto. Sem cadastro, sem histórico: as mensagens só viajam entre quem está na sala.</p>
 
-    <div class="actions">
-      <%= button_to rooms_path, class: "btn btn-dark", form_class: "inline" do %>
-        Criar sala <span aria-hidden="true">→</span>
-      <% end %>
-    </div>
+    <%= button_to rooms_path, class: "btn btn-dark", form_class: "actions" do %>
+      Criar sala <span aria-hidden="true">→</span>
+    <% end %>
 
     <%= form_with url: enter_path, method: :get, class: "join" do |f| %>
       <label for="code" class="sr-only">Código ou link da sala</label>
@@ -18,11 +15,7 @@
             autocomplete: "off", autocapitalize: "off", spellcheck: false %>
       <button class="btn btn-glass btn-sm">Entrar</button>
     <% end %>
-  </section>
+  </main>
 
-  <ul class="facts">
-    <li><strong>0</strong><span>mensagens guardadas</span></li>
-    <li><strong>128</strong><span>bits de segurança no link de cada sala</span></li>
-    <li><strong>1</strong><span>link para entrar</span></li>
-  </ul>
-</main>
+  <%= render "layouts/footer" %>
+</div>

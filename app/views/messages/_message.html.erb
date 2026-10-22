@@ -1,5 +1,5 @@
 <article id="message_<%= message.id %>" class="msg" data-room-target="message" data-author="<%= message.author.id %>">
+  <time datetime="<%= message.sent_at.iso8601 %>"><%= message.sent_at.strftime("%H:%M") %></time>
   <span class="who"><%= message.author.name %></span>
   <p class="bubble"><%= message.body %></p>
-  <time datetime="<%= message.sent_at.iso8601 %>"><%= message.sent_at.strftime("%H:%M") %></time>
 </article>

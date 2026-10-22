@@ -55,5 +55,8 @@
     <ul id="people" class="people">
       <%= render partial: "users/user", collection: Presence.users(@token), as: :user %>
     </ul>
+
+    <h3>Aparência</h3>
+    <%= render "layouts/theme_switch" %>
   </dialog>
 </div>
