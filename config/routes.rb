@@ -1,17 +1,13 @@
 Rails.application.routes.draw do
-  root "chat#index"
+  get "up" => "rails/health#show", as: :rails_health_check
 
-  scope "/chat", as: "chat" do
-    get "/", to: "chat#enter"
-    post "/", to: "chat#create"
+  root "rooms#new"
+  post "salas", to: "rooms#create", as: :rooms
+  get "entrar", to: "rooms#enter", as: :enter
 
-    scope ":room_name" do
-      get "/", to: "chat#show", as: :show
-
-      get "users/new", to: "users#new", as: :users_new
-      post "users/new", to: "users#create", as: :users_create
-
-      post "create", to: "messages#create", as: :create
-    end
+  scope "r/:token", constraints: { token: /[A-Za-z0-9_-]{22}/ } do
+    get "/", to: "rooms#show", as: :room
+    post "nome", to: "users#create", as: :room_user
+    post "mensagens", to: "messages#create", as: :room_messages
   end
 end

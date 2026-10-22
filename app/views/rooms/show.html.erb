@@ -1,0 +1,59 @@
+<% content_for :title, "Sala · Turbo Chat" %>
+<% content_for :head do %>
+  <meta name="turbo-cache-control" content="no-cache">
+<% end %>
+
+<div class="room" data-controller="room" data-room-me-value="<%= current_user.id %>">
+  <%= turbo_stream_from "room", @token, channel: RoomChannel %>
+
+  <header class="nav room-nav">
+    <%= link_to root_path, class: "icon-btn", aria: { label: "Sair da sala" } do %>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+    <% end %>
+    <div class="room-title">
+      <strong>Sala</strong>
+      <span><%= @token.first(6) %>…</span>
+    </div>
+    <button type="button" class="pill" data-action="room#openInfo" aria-haspopup="dialog">
+      <span class="dot" aria-hidden="true"></span>
+      <span id="online-count"><%= Presence.count(@token) %></span>&nbsp;online
+    </button>
+  </header>
+
+  <section class="thread" data-room-target="thread">
+    <div class="empty">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="3"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+      <p><strong>A conversa começa aqui.</strong><br>As mensagens somem quando você sai. Toque em “online” para convidar alguém.</p>
+    </div>
+    <div id="messages" role="log" aria-label="Mensagens"></div>
+  </section>
+
+  <%= form_with url: room_messages_path(@token), class: "composer",
+        data: { room_target: "form", action: "turbo:submit-end->room#sent" } do |f| %>
+    <p class="composer-error" data-room-target="error" role="alert" hidden></p>
+    <%= f.text_field :body, placeholder: "Mensagem", required: true, autocomplete: "off", enterkeyhint: "send",
+          maxlength: Message::MAX_LENGTH, aria: { label: "Mensagem" }, data: { room_target: "input" } %>
+    <button class="send" aria-label="Enviar">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
+    </button>
+  <% end %>
+
+  <dialog class="sheet" data-room-target="info" closedby="any" aria-labelledby="info-title">
+    <form method="dialog">
+      <button class="icon-btn close" aria-label="Fechar">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </form>
+    <h2 id="info-title">Convide para a sala</h2>
+    <p class="muted">Quem tiver o link entra. Ele é a única chave.</p>
+    <div class="link-row">
+      <input type="text" readonly value="<%= room_url(@token) %>" aria-label="Link da sala" data-room-target="link">
+      <button type="button" class="btn btn-dark btn-sm" data-action="room#share">Compartilhar</button>
+    </div>
+
+    <h3>Online agora</h3>
+    <ul id="people" class="people">
+      <%= render partial: "users/user", collection: Presence.users(@token), as: :user %>
+    </ul>
+  </dialog>
+</div>

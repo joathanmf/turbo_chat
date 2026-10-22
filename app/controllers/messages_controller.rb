@@ -1,33 +1,15 @@
 class MessagesController < ApplicationController
-  def create
-    @message = Message.new(
-      content: params[:content],
-      user: User.find_by(id: session[:user_id]),
-      room: Room.find_by(name: params[:room_name])
-    )
+  rate_limit to: 20, within: 10.seconds, by: -> { current_user&.id || request.remote_ip }, with: -> { head :too_many_requests }
 
-    if @message.save
-      respond_to do |format|
-        format.turbo_stream do
-          render turbo_stream: turbo_stream.append(
-            "messages", partial: "messages/message", locals: { message: @message, from_stream: false }
-          )
-        end
-        format.html { redirect_to chat_show_path(params[:room_name]) }
-      end
-    else
-      respond_to do |format|
-        format.turbo_stream do
-          render turbo_stream: turbo_stream.update(
-            "form-errors",
-            partial: "shared/flash", locals: { alert: "Erro ao enviar mensagem" }
-          )
-        end
-        format.html do
-          flash[:alert] = "Erro ao enviar mensagem"
-          redirect_to chat_show_path(params[:room_name])
-        end
-      end
-    end
+  # Relays the message to everyone in the room (sender included) and keeps nothing.
+  def create
+    return head :unauthorized unless current_user
+
+    message = Message.build(author: current_user, body: params[:body])
+    return head :unprocessable_content unless message
+
+    Turbo::StreamsChannel.broadcast_append_to "room", params[:token],
+      target: "messages", partial: "messages/message", locals: { message: }
+    head :no_content
   end
 end

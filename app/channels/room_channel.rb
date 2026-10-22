@@ -1,24 +1,28 @@
-class RoomChannel < ApplicationCable::Channel
-  include ActionView::RecordIdentifier
+# The room's Turbo stream, plus presence: joining or leaving updates everyone's "online" list.
+class RoomChannel < Turbo::StreamsChannel
+  def subscribed
+    super
+    return if subscription_rejected?
 
-  def subscribed; end
+    stream = verified_stream_name_from_params
+    return reject unless stream.start_with?("room:")
 
-  def unsubscribed
-    room = Room.find_by(name: params[:room_name])
-    current_user = User.find_by(id: params[:user_id])
-
-    if room && current_user
-      RoomUser.where(user: current_user, room: room).delete_all
-      broadcast_remove_user(room, current_user)
+    @token = stream.delete_prefix("room:")
+    if Presence.join(@token, current_user)
+      Turbo::StreamsChannel.broadcast_append_to "room", @token, target: "people", partial: "users/user", locals: { user: current_user }
+      broadcast_count
     end
   end
 
-  private
+  def unsubscribed
+    return unless @token && Presence.leave(@token, current_user)
 
-  def broadcast_remove_user(room, user)
-    Turbo::StreamsChannel.broadcast_remove_to(
-      "online_users_room_#{room.name}",
-      target: dom_id(user)
-    )
+    Turbo::StreamsChannel.broadcast_remove_to "room", @token, target: current_user.dom_id
+    broadcast_count
   end
+
+  private
+    def broadcast_count
+      Turbo::StreamsChannel.broadcast_update_to "room", @token, target: "online-count", html: Presence.count(@token).to_s
+    end
 end

@@ -1,10 +1,9 @@
-class Message < ApplicationRecord
-  belongs_to :user
-  belongs_to :room
+# A chat message. Built, broadcast once, then forgotten: never stored.
+class Message < Data.define(:id, :author, :body, :sent_at)
+  MAX_LENGTH = 1000
 
-  validates :content, presence: true, length: { minimum: 1, maximum: 1024 }
-
-  after_create_commit do
-    broadcast_append_to room, target: "messages", partial: "messages/message", locals: { message: self, from_stream: true }
+  def self.build(author:, body:)
+    body = body.to_s.strip
+    new(id: SecureRandom.uuid, author:, body:, sent_at: Time.current) if body.length.between?(1, MAX_LENGTH)
   end
 end

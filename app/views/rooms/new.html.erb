@@ -1,0 +1,28 @@
+<%= render "layouts/nav" %>
+
+<main class="page">
+  <section class="hero">
+    <p class="eyebrow">Sem cadastro · Sem histórico</p>
+    <h1>Converse.<br><span class="grad">Sem deixar rastros.</span></h1>
+    <p class="lead">Crie uma sala, mande o link e pronto. As mensagens só viajam entre quem está na sala. Ninguém, nem o servidor, guarda nada.</p>
+
+    <div class="actions">
+      <%= button_to rooms_path, class: "btn btn-dark", form_class: "inline" do %>
+        Criar sala <span aria-hidden="true">→</span>
+      <% end %>
+    </div>
+
+    <%= form_with url: enter_path, method: :get, class: "join" do |f| %>
+      <label for="code" class="sr-only">Código ou link da sala</label>
+      <%= f.text_field :code, id: "code", placeholder: "Já tem um link? Cole aqui", required: true,
+            autocomplete: "off", autocapitalize: "off", spellcheck: false %>
+      <button class="btn btn-glass btn-sm">Entrar</button>
+    <% end %>
+  </section>
+
+  <ul class="facts">
+    <li><strong>0</strong><span>mensagens guardadas</span></li>
+    <li><strong>128</strong><span>bits de segurança no link de cada sala</span></li>
+    <li><strong>1</strong><span>link para entrar</span></li>
+  </ul>
+</main>
