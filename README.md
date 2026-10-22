@@ -2,7 +2,7 @@
 
 Salas de conversa instantâneas. Sem cadastro, sem banco de dados e sem histórico: as mensagens só **transitam** entre quem está na sala e nunca são gravadas.
 
-Ruby 4.0.8 · Rails 8.1 (só Action Pack, Action View e Action Cable) · Hotwire (Turbo + Stimulus) · importmap · CSS puro.
+Ruby 4.0.8 · Rails 8.1 (só Action Pack, Action View e Action Cable) · Hotwire (Turbo + Stimulus) · importmap · CSS puro · instalável como PWA.
 
 ## Rodando
 
