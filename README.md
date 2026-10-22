@@ -1,20 +1,42 @@
-# Turbo Chat com Rails 8
+# Turbo Chat
 
-O que foi usado:
-- Hotwire Turbo
-- SQLite3
-- Tailwind
-- Webpack
+Salas de conversa instantâneas. Sem cadastro, sem banco de dados e sem histórico: as mensagens só **transitam** entre quem está na sala e nunca são gravadas.
 
-Passo a passo:
-- Instale o Ruby 3.4.2
-- Rode o comando bundle install e yarn install
-- Rode o setup do banco de dados
-- Inicie a aplicação em desenvolvimento com bin/dev
-- Pronto
+Ruby 4.0.8 · Rails 8.1 (só Action Pack, Action View e Action Cable) · Hotwire (Turbo + Stimulus) · importmap · CSS puro.
 
-<img width="1920" height="1050" alt="image" src="https://github.com/user-attachments/assets/f09d8966-6ee8-47de-9d4d-a4c1734e7cea" />
-<img width="1920" height="1050" alt="image" src="https://github.com/user-attachments/assets/a3f4defb-6574-4263-9a66-7930ddb1051b" />
-<img width="1920" height="1050" alt="image" src="https://github.com/user-attachments/assets/7c7bdc19-9cb6-40a6-a1e4-95cd5713cb77" />
+## Rodando
 
+Requisitos: Ruby 4.0.8 (`mise install`) e [Task](https://taskfile.dev).
 
+```sh
+task dev     # http://localhost:3000 (também acessível pela rede local, para testar no celular)
+task test    # testes
+task check   # testes + rubocop + brakeman + bundler-audit
+```
+
+Não há build de assets nem Node: o CSS e o JS são servidos direto pelo Propshaft e o importmap.
+
+## Como funciona
+
+| Coisa | Onde vive |
+|---|---|
+| Sala | Só um token aleatório de 128 bits na URL (`/r/:token`). Existe enquanto alguém está nela. |
+| Usuário | Nome + id aleatório no cookie de sessão (criptografado). |
+| Mensagem | `POST` → validada → transmitida via Turbo Stream para a sala → esquecida. |
+| Quem está online | Memória do processo (`Presence`), atualizada pelo `RoomChannel` ao entrar/sair. |
+
+## Segurança
+
+- Identidade do WebSocket vem do cookie de sessão, nunca de parâmetros do cliente.
+- Streams assinados pelo Turbo; tokens de sala com formato validado na rota.
+- CSP rígida com nonce (`default-src 'none'`), HSTS, CSRF.
+- `rate_limit` em criar sala, definir nome e enviar mensagem.
+- Conteúdo e nome filtrados dos logs (`[FILTERED]`); transmissões só aparecem em nível `debug`.
+
+## Limite conhecido
+
+O adapter do Action Cable é `async` (em memória). Isso exige **um único processo Puma**. Para escalar horizontalmente, troque para `adapter: redis` em `config/cable.yml` e mova `Presence` para conjuntos no Redis (que só repassa, não armazena).
+
+## Deploy
+
+Kamal: preencha `config/deploy.yml` e exporte `SECRET_KEY_BASE` (gere com `bin/rails secret`) e `KAMAL_REGISTRY_PASSWORD`.

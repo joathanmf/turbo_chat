@@ -1,0 +1,32 @@
+version: "3"
+
+vars:
+  PORT: '{{.PORT | default "3000"}}'
+
+tasks:
+  setup:
+    desc: Instala as gems
+    cmds:
+      - bundle check || bundle install
+    sources: [Gemfile, Gemfile.lock]
+
+  dev:
+    desc: "Sobe o servidor em http://localhost:{{.PORT}} (acessível na rede local para testar no celular)"
+    deps: [setup]
+    cmds:
+      - bin/rails server -b 0.0.0.0 -p {{.PORT}}
+
+  test:
+    desc: Roda os testes
+    deps: [setup]
+    cmds:
+      - bin/rails test
+
+  check:
+    desc: Testes, lint e auditoria de segurança
+    deps: [setup]
+    cmds:
+      - bin/rails test
+      - bin/rubocop
+      - bin/brakeman --no-pager --quiet
+      - bundle exec bundler-audit check --update
