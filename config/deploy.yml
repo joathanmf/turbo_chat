@@ -1,16 +1,16 @@
-# Deploy com Kamal: `bin/kamal setup` na primeira vez, `bin/kamal deploy` depois.
-# Antes do primeiro deploy, troque o IP (servers) e o domínio (proxy.host), e gere o segredo (ver .kamal/secrets).
+# Branch deploy-teste: EC2 t3.micro de teste na AWS pessoal (us-east-2), endereço gratuito do sslip.io.
+# Segredo em ~/.config/turbo_chat (ver .kamal/secrets). `bin/kamal setup` na 1ª vez, `bin/kamal deploy` depois.
 service: turbo_chat
 image: turbo_chat
 
 servers:
   web:
-    - 203.0.113.10
+    - 18.117.133.39
 
 # Let's Encrypt automático; o DNS do domínio precisa apontar para o servidor antes do `kamal setup`.
 proxy:
   ssl: true
-  host: turbo-chat.example.com
+  host: 18-117-133-39.sslip.io
   run:
     log_max_size: "50m"
 
