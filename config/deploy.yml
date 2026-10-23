@@ -1,31 +1,49 @@
-# Kamal deploy. Fill in image, server, host and registry before the first `kamal setup`.
+# Deploy com Kamal: `bin/kamal setup` na primeira vez, `bin/kamal deploy` depois.
+# Antes do primeiro deploy, troque o IP (servers) e o domínio (proxy.host), e gere o segredo (ver .kamal/secrets).
 service: turbo_chat
-image: your-user/turbo_chat
+image: turbo_chat
 
 servers:
   web:
-    - 192.168.0.1
+    - 203.0.113.10
 
+# Let's Encrypt automático; o DNS do domínio precisa apontar para o servidor antes do `kamal setup`.
 proxy:
   ssl: true
-  host: chat.example.com
+  host: turbo-chat.example.com
+  run:
+    log_max_size: "50m"
 
+# Registry local do Kamal: a imagem vai para o servidor por túnel SSH, sem Docker Hub.
 registry:
-  username: your-user
-  password:
-    - KAMAL_REGISTRY_PASSWORD
+  server: localhost:5555
 
 env:
   secret:
     - SECRET_KEY_BASE
-  # Do not set WEB_CONCURRENCY: presence and the async cable adapter live in ONE Puma process.
+  clear:
+    # O kamal-proxy já registra cada requisição; o log do Thruster só duplicava.
+    LOG_REQUESTS: false
+  # Não defina WEB_CONCURRENCY: a presença e o cable async vivem em UM processo Puma.
+
+# O padrão do Docker (um arquivo de 10 MB) apaga o histórico inteiro ao girar.
+logging:
+  options:
+    max-size: 10m
+    max-file: 5
 
 aliases:
   console: app exec --interactive --reuse "bin/rails console"
   shell: app exec --interactive --reuse "bash"
   logs: app logs -f
 
+# Junta os assets da versão nova e da antiga para requisições em andamento não darem 404.
 asset_path: /rails/public/assets
 
 builder:
   arch: amd64
+
+# EC2 com Ubuntu: entra como `ubuntu` (no grupo docker), não como root.
+ssh:
+  user: ubuntu
+  keys: [ "~/.ssh/turbo-chat-aws.pem" ]
