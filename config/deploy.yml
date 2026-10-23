@@ -1,4 +1,4 @@
-# Branch deploy-teste: EC2 t3.micro de teste na AWS pessoal (us-east-2), endereço gratuito do sslip.io.
+# Branch deploy-teste: EC2 t3.micro de teste na AWS pessoal (us-east-2), subdomínio gratuito do DuckDNS.
 # Segredo em ~/.config/turbo_chat (ver .kamal/secrets). `bin/kamal setup` na 1ª vez, `bin/kamal deploy` depois.
 service: turbo_chat
 image: turbo_chat
@@ -10,7 +10,7 @@ servers:
 # Let's Encrypt automático; o DNS do domínio precisa apontar para o servidor antes do `kamal setup`.
 proxy:
   ssl: true
-  host: 18-117-133-39.sslip.io
+  host: turbo-chat.duckdns.org
   run:
     log_max_size: "50m"
 
