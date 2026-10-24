@@ -5,7 +5,7 @@ class MessagesController < ApplicationController
   def create
     return head :unauthorized unless current_user
 
-    message = Message.build(author: current_user, body: params[:body])
+    message = Message.build(author: current_user, body: params[:body], id: params[:id])
     return head :unprocessable_content unless message
 
     Turbo::StreamsChannel.broadcast_append_to "room", params[:token],

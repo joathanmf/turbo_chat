@@ -3,7 +3,7 @@
   <meta name="turbo-cache-control" content="no-cache">
 <% end %>
 
-<div class="room" data-controller="room" data-room-me-value="<%= current_user.id %>">
+<div class="room" data-controller="room" data-room-me-value="<%= current_user.id %>" data-action="room:typing@document->room#showTyping">
   <%= turbo_stream_from "room", @token, channel: RoomChannel %>
 
   <header class="nav room-nav">
@@ -14,6 +14,10 @@
       <strong>Sala</strong>
       <span><%= @token.first(6) %>…</span>
     </div>
+    <button type="button" class="icon-btn copy-icon" data-action="room#copy" aria-label="Copiar link da sala" title="Copiar link">
+      <svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H15"/></svg>
+      <svg class="i-done" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>
+    </button>
     <button type="button" class="pill" data-action="room#openInfo" aria-haspopup="dialog">
       <span class="dot" aria-hidden="true"></span>
       <span id="online-count"><%= Presence.count(@token) %></span>&nbsp;online
@@ -28,11 +32,20 @@
     <div id="messages" role="log" aria-label="Mensagens"></div>
   </section>
 
+  <%# Mold for the optimistic copy of what I send; the broadcast replaces it (same dom id). %>
+  <template data-room-target="draft">
+    <%= render "messages/message", message: Message.new(id: "draft", author: current_user, body: "", sent_at: Time.current) %>
+  </template>
+
   <%= form_with url: room_messages_path(@token), class: "composer",
-        data: { room_target: "form", action: "turbo:submit-end->room#sent" } do |f| %>
+        data: { room_target: "form", action: "submit->room#send" } do |f| %>
     <p class="composer-error" data-room-target="error" role="alert" hidden></p>
-    <%= f.text_field :body, placeholder: "Mensagem", required: true, autocomplete: "off", enterkeyhint: "send",
-          maxlength: Message::MAX_LENGTH, aria: { label: "Mensagem" }, data: { room_target: "input" } %>
+    <p class="typing" data-room-target="typing" aria-hidden="true">
+      <span class="dots"><i></i><i></i><i></i></span><span class="label"></span>
+    </p>
+    <%= f.text_area :body, placeholder: "Mensagem", required: true, autocomplete: "off", rows: 1,
+          maxlength: Message::MAX_LENGTH, aria: { label: "Mensagem" },
+          data: { room_target: "input", action: "input->room#autosize input->room#typed keydown->room#enter" } %>
     <button class="send" aria-label="Enviar">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
     </button>
@@ -48,7 +61,7 @@
     <p class="muted">Quem tiver o link entra. Ele é a única chave.</p>
     <div class="link-row">
       <input type="text" readonly value="<%= room_url(@token) %>" aria-label="Link da sala" data-room-target="link">
-      <button type="button" class="btn btn-dark btn-sm copy" data-action="room#copy" aria-live="polite">Copiar link</button>
+      <button type="button" class="btn btn-dark btn-sm copy" data-action="room#copy" aria-live="polite"><span class="idle">Copiar link</span><span class="done">Copiado</span></button>
     </div>
 
     <h3>Aparência</h3>

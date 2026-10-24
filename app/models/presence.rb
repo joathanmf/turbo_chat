@@ -1,28 +1,37 @@
 # Who is in each room right now, counted per open connection (a user may have several tabs).
+# A user whose last connection closes stays listed until `expire`, so a page refresh isn't announced as leave + join.
 # ponytail: in-process memory, matches the async cable adapter. Move to Redis sets if you run several servers.
 module Presence
   @rooms = {} # token => { user_id => [user, connections] }
   @lock = Mutex.new
 
   class << self
-    # True when this is the user's first connection to the room.
+    # True when the user wasn't in the room (not even inside the leave grace period).
     def join(token, user)
       @lock.synchronize do
-        entry = ((@rooms[token] ||= {})[user.id] ||= [ user, 0 ])
-        entry[1] += 1
-        entry[1] == 1
+        room = (@rooms[token] ||= {})
+        fresh = !room.key?(user.id)
+        (room[user.id] ||= [ user, 0 ])[1] += 1
+        fresh
       end
     end
 
-    # True when the user's last connection to the room is gone.
+    # True when the user's last connection is gone; call `expire` after a grace period.
     def leave(token, user)
       @lock.synchronize do
-        room = @rooms[token]
-        entry = room&.[](user.id)
-        next false unless entry
+        entry = @rooms.dig(token, user.id)
+        next false unless entry&.last&.positive?
 
         entry[1] -= 1
-        next false if entry[1].positive?
+        entry[1].zero?
+      end
+    end
+
+    # Removes the user if they still have no connection. True when removed.
+    def expire(token, user)
+      @lock.synchronize do
+        room = @rooms[token]
+        next false unless room&.dig(user.id, 1)&.zero?
 
         room.delete(user.id)
         @rooms.delete(token) if room.empty?

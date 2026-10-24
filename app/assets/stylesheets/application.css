@@ -18,7 +18,7 @@
   --green: light-dark(#34c759, #30d158);
   --red: light-dark(#ff3b30, #ff453a);
 
-  /* Bubbles: Messages gray for others, blue for mine. */
+  /* Bubbles: gray for others, blue for mine. */
   --in: light-dark(#e9e9eb, #262629);
   --out: light-dark(#0a7aff, #0a84ff);
 
@@ -76,7 +76,7 @@ body::before {
 
 h1, h2, h3, p { margin: 0; }
 a { color: inherit; }
-button, input { font: inherit; color: inherit; }
+button, input, textarea { font: inherit; color: inherit; }
 fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
 svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
@@ -313,9 +313,9 @@ input::placeholder { color: var(--muted); }
   border-radius: 999px;
 }
 
-.room-title { display: grid; line-height: 1.2; }
+.room-title { display: grid; min-width: 0; line-height: 1.2; }
 .room-title strong { font-size: 16px; }
-.room-title span { color: var(--muted); font-size: 12px; font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+.room-title span { overflow: hidden; color: var(--muted); font-size: 12px; font-family: ui-monospace, "SF Mono", Menlo, monospace; text-overflow: ellipsis; white-space: nowrap; }
 
 .pill {
   display: inline-flex;
@@ -353,7 +353,7 @@ input::placeholder { color: var(--muted); }
 .empty strong { color: var(--ink); }
 .thread:has(.msg) .empty { display: none; }
 
-/* ---------- Bubbles (Messages style) ---------- */
+/* ---------- Bubbles ---------- */
 
 .msg {
   display: grid;
@@ -363,25 +363,14 @@ input::placeholder { color: var(--muted); }
 .msg.cont { margin-top: 2px; }
 .msg.mine { justify-items: end; }
 
-/* Centered timestamp, only after a pause. */
-.msg time { display: none; }
-.msg.stamp time {
-  display: block;
-  justify-self: center;
-  margin: 14px 0 8px;
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-}
-
 .who { margin: 0 0 2px 14px; color: var(--muted); font-size: 11.5px; }
 .msg.cont .who, .msg.mine .who { display: none; }
 
 .bubble {
   position: relative;
+  display: flow-root; /* contains the floated time */
   max-width: min(72%, 620px);
-  padding: 7px 13px 8px;
+  padding: 7px 12px 8px 13px;
   border-radius: 19px;
   background: var(--in);
   font-size: 16px;
@@ -391,33 +380,61 @@ input::placeholder { color: var(--muted); }
   animation: pop 0.45s var(--ease);
   transform-origin: bottom left;
 }
-.msg.mine .bubble {
-  background: var(--out);
-  color: #fff;
-  transform-origin: bottom right;
-}
+.msg.mine .bubble { background: var(--out); color: #fff; transform-origin: bottom right; }
+/* The broadcast copy of my message replaces the optimistic one: don't pop twice. */
+.msg.mine:not(.pending) .bubble { animation: none; }
 
-/* The tail: only on the last bubble of a group. Drawn with clip-path, so it works over any background. */
-.msg.tail .bubble::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: -6px;
-  width: 20px;
-  height: 20px;
-  z-index: -1; /* under the text */
-  background: var(--in);
-  clip-path: path("M20 0H6C6 9 4.6 15.4 0 20C5 20 9 19 12.2 17.3C14.3 19 16.8 20 20 20Z");
-}
-.msg.mine.tail .bubble::after { left: auto; right: -6px; background: var(--out); transform: scaleX(-1); }
+.text { white-space: pre-wrap; }
 
-/* Emoji-only messages: big, no bubble. */
+/* Time (+ status on mine) floats at the end of the text: on the last line when it fits, on its own line when not.
+   Sized by its real content, so 24h ("14:58") and 12h ("01:59 PM") clocks both fit. */
+.meta {
+  float: right;
+  position: relative;
+  top: 6px;
+  margin: 0 -3px 0 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.msg.mine .meta { color: rgba(255, 255, 255, 0.78); }
+
+/* Delivery status, mine only: pending (clock) → sent (check) or failed. No read receipts. */
+.status { display: none; }
+.msg.mine .status { display: inline-flex; }
+.status svg { display: none; width: 14px; height: 14px; stroke-width: 2.4; }
+.msg.mine .i-sent, .msg.pending .i-pending, .msg.failed .i-failed { display: block; }
+.msg.pending .i-sent, .msg.failed .i-sent { display: none; }
+
+.msg.failed { cursor: pointer; }
+.msg.failed .bubble { opacity: 0.55; }
+.msg.failed::after { content: "Não enviada · toque para reenviar"; margin: 3px 6px 0; color: var(--red); font-size: 11.5px; font-weight: 500; }
+
+/* Emoji-only messages: big, no bubble; the time sits under it. */
 .msg.jumbo .bubble { padding: 0 2px; background: none; font-size: 44px; line-height: 1.15; }
-.msg.jumbo .bubble::after { display: none; }
+.msg.jumbo .meta { float: none; top: 0; display: flex; justify-content: flex-end; margin: 2px 0 0; color: var(--muted); }
 
 @keyframes pop {
   from { opacity: 0; transform: translateY(6px) scale(0.92); }
 }
+
+/* "Ana entrou" / "Ana saiu", centered like WhatsApp. */
+.notice { display: flex; justify-content: center; margin: 14px 0 6px; }
+.notice span {
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--glass-2);
+  box-shadow: 0 1px 2px var(--shade);
+  color: var(--muted);
+  font-size: 12.5px;
+  animation: pop 0.45s var(--ease);
+}
+.notice strong { color: var(--ink); font-weight: 600; }
 
 /* ---------- Composer ---------- */
 
@@ -425,13 +442,28 @@ input::placeholder { color: var(--muted); }
   position: relative;
   flex: none;
   display: flex;
-  align-items: center;
+  align-items: flex-end; /* the send button stays at the bottom while the field grows */
   gap: 8px;
   margin-bottom: max(12px, env(safe-area-inset-bottom));
   padding: 6px 6px 6px 18px;
-  border-radius: 999px;
+  border-radius: 26px;
 }
-.composer input { flex: 1; min-width: 0; height: 40px; border: 0; background: transparent; outline: none; }
+/* Grows with the text up to 6 lines, then scrolls (like WhatsApp). field-sizing does it natively; JS covers the rest. */
+.composer textarea {
+  flex: 1;
+  min-width: 0;
+  min-height: 40px;
+  max-height: calc(6 * 1.35em + 18px);
+  padding: 9px 0;
+  border: 0;
+  background: transparent;
+  outline: none;
+  resize: none;
+  line-height: 1.35;
+  overflow-y: auto;
+  field-sizing: content;
+  scrollbar-width: thin;
+}
 .composer:focus-within { box-shadow: var(--shadow-1), 0 0 0 3px color-mix(in srgb, var(--blue) 35%, transparent); }
 
 .send {
@@ -449,12 +481,52 @@ input::placeholder { color: var(--muted); }
 }
 .send svg { width: 20px; height: 20px; stroke-width: 2.5; }
 .send:active { transform: scale(0.92); }
-.composer:has(input:placeholder-shown) .send { opacity: 0.4; }
+.composer:has(textarea:placeholder-shown) .send { opacity: 0.4; }
+
+/* "Bia está digitando" floats above the field: no layout shift when it comes and goes. */
+.typing {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: calc(100% - 16px);
+  padding: 6px 12px 6px 10px;
+  border: 1px solid var(--stroke);
+  border-radius: 999px;
+  background: var(--glass-2);
+  box-shadow: 0 1px 2px var(--shade), 0 6px 18px var(--shade);
+  backdrop-filter: saturate(180%) blur(22px);
+  -webkit-backdrop-filter: saturate(180%) blur(22px);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(6px) scale(0.96);
+  transform-origin: bottom left;
+  transition: opacity 0.3s var(--ease), transform 0.4s var(--ease), visibility 0s linear 0.4s;
+}
+.typing.on { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
+.typing .label { overflow: hidden; text-overflow: ellipsis; }
+
+/* Three dots breathing in turn, like Messages. */
+.dots { display: inline-flex; gap: 3px; }
+.dots i { width: 5px; height: 5px; border-radius: 50%; background: currentColor; animation: dot 1.2s ease-in-out infinite; }
+.dots i:nth-child(2) { animation-delay: 0.15s; }
+.dots i:nth-child(3) { animation-delay: 0.3s; }
+@keyframes dot {
+  0%, 60%, 100% { opacity: 0.35; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-3px); }
+}
 
 .composer-error {
   position: absolute;
   bottom: calc(100% + 8px);
-  left: 18px;
+  right: 18px;
   color: var(--red);
   font-size: 13px;
   font-weight: 500;
@@ -484,6 +556,13 @@ input::placeholder { color: var(--muted); }
 
 .link-row { display: flex; gap: 8px; margin-top: 18px; }
 .copy { min-width: 116px; } /* same width for "Copiar link" and "Copiado" */
+.copy .done, .copy.copied .idle { display: none; }
+.copy.copied .done { display: inline; }
+
+.copy-icon svg { width: 20px; height: 20px; }
+.copy-icon .i-done, .copy-icon.copied .i-copy { display: none; }
+.copy-icon.copied .i-done { display: block; }
+.copy-icon.copied { color: var(--green); }
 .link-row input { height: 40px; padding: 0 14px; border-radius: 12px; color: var(--muted); font-size: 14px; text-overflow: ellipsis; }
 
 .people { margin: 0; padding: 0; list-style: none; }
