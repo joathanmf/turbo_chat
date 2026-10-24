@@ -16,6 +16,20 @@ class RoomChannelTest < ActionCable::Channel::TestCase
     assert_includes JSON.parse(broadcasts("room:#{TOKEN}").last), "entrou"
   end
 
+  # Regression: the async adapter registers the stream on another thread, so the joiner used to miss
+  # their own join broadcast and kept seeing "0 online" (or a list without themselves).
+  test "the subscriber gets the current list directly, themselves included" do
+    Presence.join(TOKEN, User.new(id: "u2", name: "Bia"))
+    subscribe signed_stream_name: @signed
+
+    snapshot = transmissions.last
+    assert_includes snapshot, %(action="update" target="online-count"><template>2</template>)
+    assert_includes snapshot, %(id="user_u1")
+    assert_includes snapshot, %(id="user_u2")
+    assert_includes snapshot, "entrou"
+    assert_not_includes RoomChannel.action_methods, "transmit_presence"
+  end
+
   test "a second tab is not announced; leaving waits for the grace period" do
     subscribe signed_stream_name: @signed
     assert_no_broadcasts "room:#{TOKEN}" do

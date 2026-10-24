@@ -12,6 +12,7 @@ class RoomChannel < Turbo::StreamsChannel
 
     @token = stream.delete_prefix("room:")
     self.class.announce(@token, current_user, :join) if Presence.join(@token, current_user)
+    transmit_presence
   end
 
   def unsubscribed
@@ -42,4 +43,18 @@ class RoomChannel < Turbo::StreamsChannel
     Turbo::StreamsChannel.broadcast_update_to "room", token, target: "online-count", html: Presence.count(token).to_s
     Turbo::StreamsChannel.broadcast_append_to "room", token, target: "messages", partial: "messages/notice", locals: { user:, event: }
   end
+
+  private
+    # The async adapter registers this subscription on another thread, so the broadcasts above usually reach
+    # everyone except the person who just connected. Send them the current list directly (no pub/sub race).
+    # Runs on every (re)subscribe, so a dropped connection also comes back in sync.
+    def transmit_presence
+      people = ApplicationController.render(partial: "users/user", collection: Presence.users(@token), as: :user)
+      notice = ApplicationController.render(partial: "messages/notice", locals: { user: current_user, event: :join })
+      transmit [
+        self.class.turbo_stream_action_tag(:update, target: "people", template: people),
+        self.class.turbo_stream_action_tag(:update, target: "online-count", template: Presence.count(@token)),
+        self.class.turbo_stream_action_tag(:append, target: "messages", template: notice)
+      ].join
+    end
 end

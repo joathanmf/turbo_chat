@@ -71,7 +71,12 @@ export default class extends Controller {
   }
 
   noticeTargetConnected(el) {
-    if (el.dataset.user === this.meValue) el.querySelector("span").textContent = "Você entrou"
+    if (el.dataset.user === this.meValue) {
+      // My join can arrive twice (room broadcast + direct snapshot) or again after a reconnect: show it once.
+      if (this.joinShown) return el.remove()
+      this.joinShown = true
+      el.querySelector("span").textContent = "Você entrou"
+    }
     if (el.dataset.event === "leave") this.stopTyping(el.dataset.user)
     this.follow(el, false)
   }
