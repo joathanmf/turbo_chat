@@ -41,4 +41,4 @@ O adapter do Action Cable é `async` (em memória). Isso exige **um único proce
 
 Kamal, com registry local (a imagem vai por túnel SSH, sem Docker Hub). Na `main` o `config/deploy.yml` tem IP e domínio de exemplo; o segredo vem de `~/.config/turbo_chat/secret_key_base` (ver `.kamal/secrets`).
 
-Deploy de teste: branch `deploy-teste`, EC2 t3.micro na AWS (us-east-2) em https://turbo-chat.duckdns.org. Para atualizar, faça merge da `main` na `deploy-teste` e rode `bin/kamal deploy`.
+Deploy de teste: branch `deploy-teste`, EC2 t3.nano na AWS (us-east-2, IP fixo 3.143.103.125) em https://turbo-chat.duckdns.org. Para atualizar, faça merge da `main` na `deploy-teste` e rode `bin/kamal deploy`.
