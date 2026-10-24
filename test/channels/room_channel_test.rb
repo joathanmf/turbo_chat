@@ -32,6 +32,20 @@ class RoomChannelTest < ActionCable::Channel::TestCase
     assert_includes html, "saiu"
   end
 
+  test "typing is relayed to the room (escaped), at most once per second per connection" do
+    stub_connection current_user: User.new(id: "u2", name: %(<b>"Bia"</b>))
+    subscribe signed_stream_name: @signed
+
+    assert_broadcasts "room:#{TOKEN}", 1 do
+      perform :typing
+      perform :typing # too soon: dropped
+    end
+    html = JSON.parse(broadcasts("room:#{TOKEN}").last)
+    assert_includes html, %(action="typing")
+    assert_includes html, %(data-user="u2")
+    assert_includes html, %(data-name="&lt;b&gt;&quot;Bia&quot;&lt;/b&gt;")
+  end
+
   test "rejects forged stream names" do
     subscribe signed_stream_name: "forged"
     assert subscription.rejected?

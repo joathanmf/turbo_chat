@@ -10,6 +10,9 @@ const isJumbo = text => /\p{Extended_Pictographic}/u.test(text) &&
 const uuid = () => crypto.randomUUID?.() ??
   "10000000-1000-4000-8000-100000000000".replace(/[018]/g, c => (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16))
 
+const TYPING_SEND_EVERY = 3000 // ms between "typing" events while someone keeps typing
+const TYPING_SHOW_FOR = 5000 // ms the indicator stays without a new event
+
 let audio
 // A soft, short "pop" for incoming messages. Synthesized: no audio file to download.
 function chime() {
@@ -33,10 +36,11 @@ function unlockAudio() {
 }
 
 export default class extends Controller {
-  static targets = [ "thread", "message", "notice", "draft", "form", "input", "error", "info", "link" ]
+  static targets = [ "thread", "message", "notice", "draft", "form", "input", "error", "info", "link", "code", "typing" ]
   static values = { me: String }
 
   connect() {
+    this.typers = new Map() // user id => { name, until }
     unlockAudio() // works right away if the person already clicked on an earlier page (Turbo keeps the document)
     this.unlock = () => unlockAudio()
     addEventListener("pointerdown", this.unlock, { once: true })
@@ -60,12 +64,47 @@ export default class extends Controller {
     el.classList.toggle("jumbo", isJumbo(el.querySelector(".text").textContent))
 
     this.follow(el, mine)
-    if (!mine) chime()
+    if (!mine) {
+      chime()
+      this.stopTyping(el.dataset.author)
+    }
   }
 
   noticeTargetConnected(el) {
     if (el.dataset.user === this.meValue) el.querySelector("span").textContent = "Você entrou"
+    if (el.dataset.event === "leave") this.stopTyping(el.dataset.user)
     this.follow(el, false)
+  }
+
+  // I'm typing: tell the room, at most every few seconds.
+  typed() {
+    if (!this.inputTarget.value.trim() || Date.now() - (this.typedAt ?? 0) < TYPING_SEND_EVERY) return
+    this.typedAt = Date.now()
+    this.element.querySelector("turbo-cable-stream-source")?.subscription?.perform("typing")
+  }
+
+  // Someone else is typing (from the custom "typing" stream action, see application.js).
+  showTyping({ detail: { id, name } }) {
+    if (id === this.meValue) return
+    this.typers.set(id, { name, until: Date.now() + TYPING_SHOW_FOR })
+    this.renderTyping()
+    setTimeout(() => this.renderTyping(), TYPING_SHOW_FOR + 50)
+  }
+
+  stopTyping(id) {
+    if (this.typers.delete(id)) this.renderTyping()
+  }
+
+  // Replaces the room code in the header, like WhatsApp groups.
+  renderTyping() {
+    for (const [ id, { until } ] of this.typers) if (until < Date.now()) this.typers.delete(id)
+    const names = [ ...this.typers.values() ].map(t => t.name)
+    this.typingTarget.textContent =
+      names.length === 1 ? `${names[0]} está digitando…` :
+      names.length === 2 ? `${names[0]} e ${names[1]} estão digitando…` :
+      `${names.length} pessoas estão digitando…`
+    this.typingTarget.hidden = names.length === 0
+    this.codeTarget.hidden = names.length > 0
   }
 
   // Optimistic send: show it now (pending), post in the background. Several can be in flight at once.
@@ -83,6 +122,7 @@ export default class extends Controller {
     document.getElementById("messages").append(draft)
 
     this.formTarget.reset()
+    this.typedAt = 0 // the next message announces typing right away
     this.autosize()
     this.inputTarget.focus()
     this.deliver(id, body)

@@ -3,7 +3,7 @@
   <meta name="turbo-cache-control" content="no-cache">
 <% end %>
 
-<div class="room" data-controller="room" data-room-me-value="<%= current_user.id %>">
+<div class="room" data-controller="room" data-room-me-value="<%= current_user.id %>" data-action="room:typing@document->room#showTyping">
   <%= turbo_stream_from "room", @token, channel: RoomChannel %>
 
   <header class="nav room-nav">
@@ -12,7 +12,8 @@
     <% end %>
     <div class="room-title">
       <strong>Sala</strong>
-      <span><%= @token.first(6) %>…</span>
+      <span data-room-target="code"><%= @token.first(6) %>…</span>
+      <span class="typing" data-room-target="typing" hidden></span>
     </div>
     <button type="button" class="icon-btn copy-icon" data-action="room#copy" aria-label="Copiar link da sala" title="Copiar link">
       <svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H15"/></svg>
@@ -42,7 +43,7 @@
     <p class="composer-error" data-room-target="error" role="alert" hidden></p>
     <%= f.text_area :body, placeholder: "Mensagem", required: true, autocomplete: "off", rows: 1,
           maxlength: Message::MAX_LENGTH, aria: { label: "Mensagem" },
-          data: { room_target: "input", action: "input->room#autosize keydown->room#enter" } %>
+          data: { room_target: "input", action: "input->room#autosize input->room#typed keydown->room#enter" } %>
     <button class="send" aria-label="Enviar">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
     </button>
