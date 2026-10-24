@@ -76,7 +76,7 @@ body::before {
 
 h1, h2, h3, p { margin: 0; }
 a { color: inherit; }
-button, input { font: inherit; color: inherit; }
+button, input, textarea { font: inherit; color: inherit; }
 fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
 svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
@@ -368,6 +368,7 @@ input::placeholder { color: var(--muted); }
 
 .bubble {
   position: relative;
+  display: flow-root; /* contains the floated time */
   max-width: min(72%, 620px);
   padding: 7px 12px 8px 13px;
   border-radius: 19px;
@@ -383,13 +384,15 @@ input::placeholder { color: var(--muted); }
 /* The broadcast copy of my message replaces the optimistic one: don't pop twice. */
 .msg.mine:not(.pending) .bubble { animation: none; }
 
-/* Time (+ status on mine) tucked into the bottom-right corner; the spacer keeps text from running under it. */
-.text::after { content: ""; display: inline-block; width: 40px; }
-.msg.mine .text::after { width: 58px; }
+.text { white-space: pre-wrap; }
+
+/* Time (+ status on mine) floats at the end of the text: on the last line when it fits, on its own line when not.
+   Sized by its real content, so 24h ("14:58") and 12h ("01:59 PM") clocks both fit. */
 .meta {
-  position: absolute;
-  right: 11px;
-  bottom: 5px;
+  float: right;
+  position: relative;
+  top: 6px;
+  margin: 0 -3px 0 10px;
   display: inline-flex;
   align-items: center;
   gap: 3px;
@@ -414,8 +417,7 @@ input::placeholder { color: var(--muted); }
 
 /* Emoji-only messages: big, no bubble; the time sits under it. */
 .msg.jumbo .bubble { padding: 0 2px; background: none; font-size: 44px; line-height: 1.15; }
-.msg.jumbo .text::after { display: none; }
-.msg.jumbo .meta { position: static; display: flex; justify-content: flex-end; margin-top: 2px; color: var(--muted); }
+.msg.jumbo .meta { float: none; top: 0; display: flex; justify-content: flex-end; margin: 2px 0 0; color: var(--muted); }
 
 @keyframes pop {
   from { opacity: 0; transform: translateY(6px) scale(0.92); }
@@ -440,13 +442,28 @@ input::placeholder { color: var(--muted); }
   position: relative;
   flex: none;
   display: flex;
-  align-items: center;
+  align-items: flex-end; /* the send button stays at the bottom while the field grows */
   gap: 8px;
   margin-bottom: max(12px, env(safe-area-inset-bottom));
   padding: 6px 6px 6px 18px;
-  border-radius: 999px;
+  border-radius: 26px;
 }
-.composer input { flex: 1; min-width: 0; height: 40px; border: 0; background: transparent; outline: none; }
+/* Grows with the text up to 6 lines, then scrolls (like WhatsApp). field-sizing does it natively; JS covers the rest. */
+.composer textarea {
+  flex: 1;
+  min-width: 0;
+  min-height: 40px;
+  max-height: calc(6 * 1.35em + 18px);
+  padding: 9px 0;
+  border: 0;
+  background: transparent;
+  outline: none;
+  resize: none;
+  line-height: 1.35;
+  overflow-y: auto;
+  field-sizing: content;
+  scrollbar-width: thin;
+}
 .composer:focus-within { box-shadow: var(--shadow-1), 0 0 0 3px color-mix(in srgb, var(--blue) 35%, transparent); }
 
 .send {
@@ -464,7 +481,7 @@ input::placeholder { color: var(--muted); }
 }
 .send svg { width: 20px; height: 20px; stroke-width: 2.5; }
 .send:active { transform: scale(0.92); }
-.composer:has(input:placeholder-shown) .send { opacity: 0.4; }
+.composer:has(textarea:placeholder-shown) .send { opacity: 0.4; }
 
 .composer-error {
   position: absolute;

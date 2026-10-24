@@ -83,8 +83,24 @@ export default class extends Controller {
     document.getElementById("messages").append(draft)
 
     this.formTarget.reset()
+    this.autosize()
     this.inputTarget.focus()
     this.deliver(id, body)
+  }
+
+  // Desktop: Enter sends, Shift+Enter breaks the line. Touch: Enter breaks the line, the button sends (like WhatsApp).
+  enter(event) {
+    if (event.key !== "Enter" || event.shiftKey || event.isComposing || matchMedia("(pointer: coarse)").matches) return
+    event.preventDefault()
+    this.formTarget.requestSubmit()
+  }
+
+  // The field grows with the text (CSS caps it at 6 lines). Only needed where field-sizing isn't supported.
+  autosize() {
+    if (CSS.supports("field-sizing", "content")) return
+    const field = this.inputTarget
+    field.style.height = "auto"
+    field.style.height = `${field.scrollHeight}px`
   }
 
   // Tap a failed message to send it again.

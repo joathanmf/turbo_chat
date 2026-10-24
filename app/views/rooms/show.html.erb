@@ -36,8 +36,9 @@
   <%= form_with url: room_messages_path(@token), class: "composer",
         data: { room_target: "form", action: "submit->room#send" } do |f| %>
     <p class="composer-error" data-room-target="error" role="alert" hidden></p>
-    <%= f.text_field :body, placeholder: "Mensagem", required: true, autocomplete: "off", enterkeyhint: "send",
-          maxlength: Message::MAX_LENGTH, aria: { label: "Mensagem" }, data: { room_target: "input" } %>
+    <%= f.text_area :body, placeholder: "Mensagem", required: true, autocomplete: "off", rows: 1,
+          maxlength: Message::MAX_LENGTH, aria: { label: "Mensagem" },
+          data: { room_target: "input", action: "input->room#autosize keydown->room#enter" } %>
     <button class="send" aria-label="Enviar">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
     </button>
