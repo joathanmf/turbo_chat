@@ -14,6 +14,10 @@
       <strong>Sala</strong>
       <span><%= @token.first(6) %>…</span>
     </div>
+    <button type="button" class="icon-btn copy-icon" data-action="room#copy" aria-label="Copiar link da sala" title="Copiar link">
+      <svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H15"/></svg>
+      <svg class="i-done" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>
+    </button>
     <button type="button" class="pill" data-action="room#openInfo" aria-haspopup="dialog">
       <span class="dot" aria-hidden="true"></span>
       <span id="online-count"><%= Presence.count(@token) %></span>&nbsp;online
@@ -54,7 +58,7 @@
     <p class="muted">Quem tiver o link entra. Ele é a única chave.</p>
     <div class="link-row">
       <input type="text" readonly value="<%= room_url(@token) %>" aria-label="Link da sala" data-room-target="link">
-      <button type="button" class="btn btn-dark btn-sm copy" data-action="room#copy" aria-live="polite">Copiar link</button>
+      <button type="button" class="btn btn-dark btn-sm copy" data-action="room#copy" aria-live="polite"><span class="idle">Copiar link</span><span class="done">Copiado</span></button>
     </div>
 
     <h3>Aparência</h3>

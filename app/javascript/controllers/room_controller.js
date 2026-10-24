@@ -154,8 +154,14 @@ export default class extends Controller {
       document.execCommand("copy")
       link.setSelectionRange(0, 0)
     }
-    button.textContent = "Copiado"
-    clearTimeout(this.copyTimer)
-    this.copyTimer = setTimeout(() => (button.textContent = "Copiar link"), 3000)
+    // Both copy buttons (text and icon) show "copied" for 3 s; CSS swaps the label/icon.
+    const label = button.dataset.label ??= button.ariaLabel ?? ""
+    button.classList.add("copied")
+    if (label) button.ariaLabel = "Link copiado"
+    clearTimeout(button.copyTimer)
+    button.copyTimer = setTimeout(() => {
+      button.classList.remove("copied")
+      if (label) button.ariaLabel = label
+    }, 3000)
   }
 }
