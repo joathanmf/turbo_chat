@@ -1,11 +1,11 @@
-# Branch deploy-teste: EC2 t3.micro de teste na AWS pessoal (us-east-2), subdomínio gratuito do DuckDNS.
+# Branch deploy-teste: EC2 t3.nano de teste na AWS pessoal (us-east-2), subdomínio gratuito do DuckDNS.
 # Segredo em ~/.config/turbo_chat (ver .kamal/secrets). `bin/kamal setup` na 1ª vez, `bin/kamal deploy` depois.
 service: turbo_chat
 image: turbo_chat
 
 servers:
   web:
-    - 18.117.133.39
+    - 3.143.103.125
 
 # Let's Encrypt automático; o DNS do domínio precisa apontar para o servidor antes do `kamal setup`.
 proxy:
