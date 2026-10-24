@@ -316,7 +316,6 @@ input::placeholder { color: var(--muted); }
 .room-title { display: grid; min-width: 0; line-height: 1.2; }
 .room-title strong { font-size: 16px; }
 .room-title span { overflow: hidden; color: var(--muted); font-size: 12px; font-family: ui-monospace, "SF Mono", Menlo, monospace; text-overflow: ellipsis; white-space: nowrap; }
-.room-title .typing { color: var(--blue); font-family: inherit; font-weight: 500; }
 
 .pill {
   display: inline-flex;
@@ -484,10 +483,50 @@ input::placeholder { color: var(--muted); }
 .send:active { transform: scale(0.92); }
 .composer:has(textarea:placeholder-shown) .send { opacity: 0.4; }
 
+/* "Bia está digitando" floats above the field: no layout shift when it comes and goes. */
+.typing {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: calc(100% - 16px);
+  padding: 6px 12px 6px 10px;
+  border: 1px solid var(--stroke);
+  border-radius: 999px;
+  background: var(--glass-2);
+  box-shadow: 0 1px 2px var(--shade), 0 6px 18px var(--shade);
+  backdrop-filter: saturate(180%) blur(22px);
+  -webkit-backdrop-filter: saturate(180%) blur(22px);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(6px) scale(0.96);
+  transform-origin: bottom left;
+  transition: opacity 0.3s var(--ease), transform 0.4s var(--ease), visibility 0s linear 0.4s;
+}
+.typing.on { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
+.typing .label { overflow: hidden; text-overflow: ellipsis; }
+
+/* Three dots breathing in turn, like Messages. */
+.dots { display: inline-flex; gap: 3px; }
+.dots i { width: 5px; height: 5px; border-radius: 50%; background: currentColor; animation: dot 1.2s ease-in-out infinite; }
+.dots i:nth-child(2) { animation-delay: 0.15s; }
+.dots i:nth-child(3) { animation-delay: 0.3s; }
+@keyframes dot {
+  0%, 60%, 100% { opacity: 0.35; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-3px); }
+}
+
 .composer-error {
   position: absolute;
   bottom: calc(100% + 8px);
-  left: 18px;
+  right: 18px;
   color: var(--red);
   font-size: 13px;
   font-weight: 500;

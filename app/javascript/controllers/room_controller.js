@@ -36,7 +36,7 @@ function unlockAudio() {
 }
 
 export default class extends Controller {
-  static targets = [ "thread", "message", "notice", "draft", "form", "input", "error", "info", "link", "code", "typing" ]
+  static targets = [ "thread", "message", "notice", "draft", "form", "input", "error", "info", "link", "typing" ]
   static values = { me: String }
 
   connect() {
@@ -95,16 +95,17 @@ export default class extends Controller {
     if (this.typers.delete(id)) this.renderTyping()
   }
 
-  // Replaces the room code in the header, like WhatsApp groups.
+  // Floating pill above the message field.
   renderTyping() {
     for (const [ id, { until } ] of this.typers) if (until < Date.now()) this.typers.delete(id)
     const names = [ ...this.typers.values() ].map(t => t.name)
-    this.typingTarget.textContent =
-      names.length === 1 ? `${names[0]} está digitando…` :
-      names.length === 2 ? `${names[0]} e ${names[1]} estão digitando…` :
-      `${names.length} pessoas estão digitando…`
-    this.typingTarget.hidden = names.length === 0
-    this.codeTarget.hidden = names.length > 0
+    if (names.length) {
+      this.typingTarget.querySelector(".label").textContent =
+        names.length === 1 ? `${names[0]} está digitando` :
+        names.length === 2 ? `${names[0]} e ${names[1]} estão digitando` :
+        `${names.length} pessoas estão digitando`
+    }
+    this.typingTarget.classList.toggle("on", names.length > 0)
   }
 
   // Optimistic send: show it now (pending), post in the background. Several can be in flight at once.
