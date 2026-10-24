@@ -28,8 +28,13 @@
     <div id="messages" role="log" aria-label="Mensagens"></div>
   </section>
 
+  <%# Mold for the optimistic copy of what I send; the broadcast replaces it (same dom id). %>
+  <template data-room-target="draft">
+    <%= render "messages/message", message: Message.new(id: "draft", author: current_user, body: "", sent_at: Time.current) %>
+  </template>
+
   <%= form_with url: room_messages_path(@token), class: "composer",
-        data: { room_target: "form", action: "turbo:submit-end->room#sent" } do |f| %>
+        data: { room_target: "form", action: "submit->room#send" } do |f| %>
     <p class="composer-error" data-room-target="error" role="alert" hidden></p>
     <%= f.text_field :body, placeholder: "Mensagem", required: true, autocomplete: "off", enterkeyhint: "send",
           maxlength: Message::MAX_LENGTH, aria: { label: "Mensagem" }, data: { room_target: "input" } %>

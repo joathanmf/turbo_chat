@@ -52,6 +52,17 @@ class ChatTest < ActionDispatch::IntegrationTest
     assert_includes JSON.parse(broadcasts(STREAM).last), "&lt;b&gt;oi&lt;/b&gt;", "message body must be HTML-escaped"
   end
 
+  test "the browser's message id is used, scoped by author so nobody can replace someone else's message" do
+    sign_in "Ana"
+    id = SecureRandom.uuid
+    post room_messages_path(TOKEN), params: { body: "oi", id: }
+    html = JSON.parse(broadcasts(STREAM).last)
+    assert_match %r{id="message_[A-Za-z0-9]{16}_#{id}"}, html
+
+    post room_messages_path(TOKEN), params: { body: "oi", id: %(x" onmouseover="alert(1)) }
+    assert_match %r{id="message_[A-Za-z0-9]{16}_\h{8}-\h{4}-\h{4}-\h{4}-\h{12}"}, JSON.parse(broadcasts(STREAM).last)
+  end
+
   test "empty, oversized and anonymous messages are refused" do
     post room_messages_path(TOKEN), params: { body: "oi" }
     assert_response :unauthorized

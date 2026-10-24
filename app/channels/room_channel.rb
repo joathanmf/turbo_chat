@@ -1,5 +1,7 @@
-# The room's Turbo stream, plus presence: joining or leaving updates everyone's "online" list.
+# The room's Turbo stream, plus presence: joining or leaving updates the "online" list and posts a notice.
 class RoomChannel < Turbo::StreamsChannel
+  LEAVE_GRACE = 5 # seconds; a refresh or quick reconnect shouldn't post "saiu" + "entrou"
+
   def subscribed
     super
     return if subscription_rejected?
@@ -8,21 +10,25 @@ class RoomChannel < Turbo::StreamsChannel
     return reject unless stream.start_with?("room:")
 
     @token = stream.delete_prefix("room:")
-    if Presence.join(@token, current_user)
-      Turbo::StreamsChannel.broadcast_append_to "room", @token, target: "people", partial: "users/user", locals: { user: current_user }
-      broadcast_count
-    end
+    self.class.announce(@token, current_user, :join) if Presence.join(@token, current_user)
   end
 
   def unsubscribed
     return unless @token && Presence.leave(@token, current_user)
 
-    Turbo::StreamsChannel.broadcast_remove_to "room", @token, target: current_user.dom_id
-    broadcast_count
+    token, user = @token, current_user
+    Concurrent::ScheduledTask.execute(LEAVE_GRACE) do
+      Rails.application.executor.wrap { self.class.announce(token, user, :leave) if Presence.expire(token, user) }
+    end
   end
 
-  private
-    def broadcast_count
-      Turbo::StreamsChannel.broadcast_update_to "room", @token, target: "online-count", html: Presence.count(@token).to_s
+  def self.announce(token, user, event)
+    if event == :join
+      Turbo::StreamsChannel.broadcast_append_to "room", token, target: "people", partial: "users/user", locals: { user: }
+    else
+      Turbo::StreamsChannel.broadcast_remove_to "room", token, target: user.dom_id
     end
+    Turbo::StreamsChannel.broadcast_update_to "room", token, target: "online-count", html: Presence.count(token).to_s
+    Turbo::StreamsChannel.broadcast_append_to "room", token, target: "messages", partial: "messages/notice", locals: { user:, event: }
+  end
 end

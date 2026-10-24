@@ -18,7 +18,7 @@
   --green: light-dark(#34c759, #30d158);
   --red: light-dark(#ff3b30, #ff453a);
 
-  /* Bubbles: Messages gray for others, blue for mine. */
+  /* Bubbles: gray for others, blue for mine. */
   --in: light-dark(#e9e9eb, #262629);
   --out: light-dark(#0a7aff, #0a84ff);
 
@@ -353,7 +353,7 @@ input::placeholder { color: var(--muted); }
 .empty strong { color: var(--ink); }
 .thread:has(.msg) .empty { display: none; }
 
-/* ---------- Bubbles (Messages style) ---------- */
+/* ---------- Bubbles ---------- */
 
 .msg {
   display: grid;
@@ -363,25 +363,13 @@ input::placeholder { color: var(--muted); }
 .msg.cont { margin-top: 2px; }
 .msg.mine { justify-items: end; }
 
-/* Centered timestamp, only after a pause. */
-.msg time { display: none; }
-.msg.stamp time {
-  display: block;
-  justify-self: center;
-  margin: 14px 0 8px;
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-}
-
 .who { margin: 0 0 2px 14px; color: var(--muted); font-size: 11.5px; }
 .msg.cont .who, .msg.mine .who { display: none; }
 
 .bubble {
   position: relative;
   max-width: min(72%, 620px);
-  padding: 7px 13px 8px;
+  padding: 7px 12px 8px 13px;
   border-radius: 19px;
   background: var(--in);
   font-size: 16px;
@@ -391,33 +379,60 @@ input::placeholder { color: var(--muted); }
   animation: pop 0.45s var(--ease);
   transform-origin: bottom left;
 }
-.msg.mine .bubble {
-  background: var(--out);
-  color: #fff;
-  transform-origin: bottom right;
-}
+.msg.mine .bubble { background: var(--out); color: #fff; transform-origin: bottom right; }
+/* The broadcast copy of my message replaces the optimistic one: don't pop twice. */
+.msg.mine:not(.pending) .bubble { animation: none; }
 
-/* The tail: only on the last bubble of a group. Drawn with clip-path, so it works over any background. */
-.msg.tail .bubble::after {
-  content: "";
+/* Time (+ status on mine) tucked into the bottom-right corner; the spacer keeps text from running under it. */
+.text::after { content: ""; display: inline-block; width: 40px; }
+.msg.mine .text::after { width: 58px; }
+.meta {
   position: absolute;
-  bottom: 0;
-  left: -6px;
-  width: 20px;
-  height: 20px;
-  z-index: -1; /* under the text */
-  background: var(--in);
-  clip-path: path("M20 0H6C6 9 4.6 15.4 0 20C5 20 9 19 12.2 17.3C14.3 19 16.8 20 20 20Z");
+  right: 11px;
+  bottom: 5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
-.msg.mine.tail .bubble::after { left: auto; right: -6px; background: var(--out); transform: scaleX(-1); }
+.msg.mine .meta { color: rgba(255, 255, 255, 0.78); }
 
-/* Emoji-only messages: big, no bubble. */
+/* Delivery status, mine only: pending (clock) → sent (check) or failed. No read receipts. */
+.status { display: none; }
+.msg.mine .status { display: inline-flex; }
+.status svg { display: none; width: 14px; height: 14px; stroke-width: 2.4; }
+.msg.mine .i-sent, .msg.pending .i-pending, .msg.failed .i-failed { display: block; }
+.msg.pending .i-sent, .msg.failed .i-sent { display: none; }
+
+.msg.failed { cursor: pointer; }
+.msg.failed .bubble { opacity: 0.55; }
+.msg.failed::after { content: "Não enviada · toque para reenviar"; margin: 3px 6px 0; color: var(--red); font-size: 11.5px; font-weight: 500; }
+
+/* Emoji-only messages: big, no bubble; the time sits under it. */
 .msg.jumbo .bubble { padding: 0 2px; background: none; font-size: 44px; line-height: 1.15; }
-.msg.jumbo .bubble::after { display: none; }
+.msg.jumbo .text::after { display: none; }
+.msg.jumbo .meta { position: static; display: flex; justify-content: flex-end; margin-top: 2px; color: var(--muted); }
 
 @keyframes pop {
   from { opacity: 0; transform: translateY(6px) scale(0.92); }
 }
+
+/* "Ana entrou" / "Ana saiu", centered like WhatsApp. */
+.notice { display: flex; justify-content: center; margin: 14px 0 6px; }
+.notice span {
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--glass-2);
+  box-shadow: 0 1px 2px var(--shade);
+  color: var(--muted);
+  font-size: 12.5px;
+  animation: pop 0.45s var(--ease);
+}
+.notice strong { color: var(--ink); font-weight: 600; }
 
 /* ---------- Composer ---------- */
 

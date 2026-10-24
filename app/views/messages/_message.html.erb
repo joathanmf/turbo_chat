@@ -1,5 +1,11 @@
-<article id="message_<%= message.id %>" class="msg" data-room-target="message" data-author="<%= message.author.id %>">
-  <time datetime="<%= message.sent_at.iso8601 %>"><%= message.sent_at.strftime("%H:%M") %></time>
+<article id="<%= message.dom_id %>" class="msg" data-room-target="message" data-author="<%= message.author.id %>">
   <span class="who"><%= message.author.name %></span>
-  <p class="bubble"><%= message.body %></p>
+  <p class="bubble"><span class="text"><%= message.body %></span><span class="meta">
+    <time datetime="<%= message.sent_at.iso8601 %>"><%= message.sent_at.strftime("%H:%M") %></time>
+    <span class="status" role="img" aria-label="Enviada">
+      <svg class="i-pending" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 2"/></svg>
+      <svg class="i-sent" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></svg>
+      <svg class="i-failed" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5v.01"/></svg>
+    </span>
+  </span></p>
 </article>
